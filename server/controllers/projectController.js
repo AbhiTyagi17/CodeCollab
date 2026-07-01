@@ -1,4 +1,5 @@
 const Project = require('../models/Project');
+const axios = require('axios');
 
 // Generate unique room code and invite token
 const generateRoomCode = () => {
@@ -7,6 +8,42 @@ const generateRoomCode = () => {
 
 const generateInviteToken = () => {
   return Math.random().toString(36).substring(2, 15);
+};
+
+const executeCode = async (req, res) => {
+  try {
+    const { code, language, input = "" } = req.body;
+
+    const languageMap = {
+      javascript: "javascript",
+      python: "python",
+      java: "java",
+      cpp: "c++"
+    };
+
+    const response = await axios.post('https://emkc.org/api/v2/piston/execute', {
+      language: languageMap[language] || "javascript",
+      version: "*",
+      files: [
+        {
+          content: code
+        }
+      ],
+      stdin: input
+    });
+
+    res.json({
+      output: response.data.run.output || "",
+      error: response.data.run.stderr || "",
+      status: response.data.run.code
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ 
+      message: 'Execution failed', 
+      error: error.message 
+    });
+  }
 };
 
 // @desc   Create new project
@@ -95,4 +132,4 @@ const saveProject = async (req, res) => {
   }
 };
 
-module.exports = { createProject, getProjects, getProject, saveProject  };
+module.exports = { createProject, getProjects, getProject, saveProject, executeCode };
