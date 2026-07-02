@@ -1,7 +1,8 @@
-const Project = require('../models/Project');
-const axios = require('axios');
+const Project = require("../models/Project");
+const Version = require("../models/Version");
+const axios = require("axios");
 
-// Generate unique room code and invite token
+// Helper Functions
 const generateRoomCode = () => {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 };
@@ -10,44 +11,7 @@ const generateInviteToken = () => {
   return Math.random().toString(36).substring(2, 15);
 };
 
-const executeCode = async (req, res) => {
-  try {
-    const { code, language, input = "" } = req.body;
-
-    const languageMap = {
-      javascript: "javascript",
-      python: "python",
-      java: "java",
-      cpp: "c++"
-    };
-
-    const response = await axios.post('https://emkc.org/api/v2/piston/execute', {
-      language: languageMap[language] || "javascript",
-      version: "*",
-      files: [
-        {
-          content: code
-        }
-      ],
-      stdin: input
-    });
-
-    res.json({
-      output: response.data.run.output || "",
-      error: response.data.run.stderr || "",
-      status: response.data.run.code
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ 
-      message: 'Execution failed', 
-      error: error.message 
-    });
-  }
-};
-
-// @desc   Create new project
-// @route  POST /projects
+// Main Controller Functions
 const createProject = async (req, res) => {
   try {
     const { title, description, language } = req.body;
@@ -55,81 +19,143 @@ const createProject = async (req, res) => {
     const project = await Project.create({
       title,
       description,
-      language: language || 'javascript',
+      language: language || "javascript",
       roomCode: generateRoomCode(),
       inviteToken: generateInviteToken(),
       createdBy: req.user.id,
       collaborators: [req.user.id],
-      updatedAt: Date.now()
     });
 
     res.status(201).json(project);
   } catch (error) {
-    console.error('Project Error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Project Error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-// @desc   Get all user projects
-// @route  GET /projects
 const getProjects = async (req, res) => {
   try {
     const projects = await Project.find({
-      $or: [
-        { createdBy: req.user.id },
-        { collaborators: req.user.id }
-      ]
-    }).populate('createdBy', 'name email avatar')
+      $or: [{ createdBy: req.user.id }, { collaborators: req.user.id }],
+    })
+      .populate("createdBy", "name email avatar")
       .sort({ updatedAt: -1 });
 
     res.json(projects);
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-// @desc   Get single project
-// @route  GET /projects/:id
 const getProject = async (req, res) => {
   try {
     const project = await Project.findById(req.params.id)
-      .populate('createdBy', 'name email avatar')
-      .populate('collaborators', 'name email avatar');
+      .populate("createdBy", "name email avatar")
+      .populate("collaborators", "name email avatar");
 
     if (!project) {
-      return res.status(404).json({ message: 'Project not found' });
+      return res.status(404).json({ message: "Project not found" });
     }
 
-    // Check if user has access
     const isOwner = project.createdBy._id.toString() === req.user.id;
-    const isCollaborator = project.collaborators.some(c => c._id.toString() === req.user.id);
+    const isCollaborator = project.collaborators.some(
+      (c) => c._id.toString() === req.user.id
+    );
 
     if (!isOwner && !isCollaborator) {
-      return res.status(403).json({ message: 'Not authorized' });
+      return res.status(403).json({ message: "Not authorized" });
     }
 
     res.json(project);
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 };
-
 
 const saveProject = async (req, res) => {
   try {
     const { currentCode } = req.body;
-    
     const project = await Project.findById(req.params.id);
-    
-    if (!project) return res.status(404).json({ message: 'Project not found' });
+
+    if (!project) return res.status(404).json({ message: "Project not found" });
 
     project.currentCode = currentCode;
     await project.save();
 
-    res.json({ message: 'Project saved', project });
+    res.json({ message: "Project saved", project });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-module.exports = { createProject, getProjects, getProject, saveProject, executeCode };
+const executeCode = async (req, res) => {
+  try {
+    const { code, language, input = "" } = req.body;
+
+    let output = `Executed ${language} code successfully (Mock for prototype)`;
+    if (language === "javascript") output = "Hello from CollabCode!\nJS executed.";
+    if (language === "python") output = "Hello from CollabCode!\nPython executed.";
+
+    await new Promise(resolve => setTimeout(resolve, 600));
+
+    res.json({
+      output,
+      error: "",
+      status: "Success",
+      note: "Mock execution - Judge0 can be integrated later"
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Execution failed" });
+  }
+};
+
+const saveVersion = async (req, res) => {
+  try {
+    const { projectId, codeSnapshot } = req.body;
+    const version = await Version.create({
+      projectId,
+      codeSnapshot,
+      createdBy: req.user.id,
+    });
+    res.status(201).json(version);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to save version" });
+  }
+};
+
+const getVersions = async (req, res) => {
+  try {
+    const versions = await Version.find({ projectId: req.params.projectId })
+      .sort({ createdAt: -1 });
+    res.json(versions);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch versions" });
+  }
+};
+
+const restoreVersion = async (req, res) => {
+  try {
+    const version = await Version.findById(req.params.versionId);
+    if (!version) return res.status(404).json({ message: "Version not found" });
+
+    await Project.findByIdAndUpdate(version.projectId, {
+      currentCode: version.codeSnapshot,
+    });
+
+    res.json({ message: "Version restored successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to restore version" });
+  }
+};
+
+// Final Export
+module.exports = {
+  createProject,
+  getProjects,
+  getProject,
+  saveProject,
+  executeCode,
+  saveVersion,
+  getVersions,
+  restoreVersion,
+};

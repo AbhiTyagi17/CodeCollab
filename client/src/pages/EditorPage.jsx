@@ -12,7 +12,6 @@ const EditorPage = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
-
   const [project, setProject] = useState(null);
   const [code, setCode] = useState("// Start coding...");
   const [language, setLanguage] = useState("javascript");
@@ -20,8 +19,10 @@ const EditorPage = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [output, setOutput] = useState("");
-const [input, setInput] = useState("");
-const [isExecuting, setIsExecuting] = useState(false);
+  const [versions, setVersions] = useState([]);
+  const [showVersions, setShowVersions] = useState(false);
+  const [input, setInput] = useState("");
+  const [isExecuting, setIsExecuting] = useState(false);
 
   // Socket Connection
   useEffect(() => {
@@ -129,6 +130,42 @@ const [isExecuting, setIsExecuting] = useState(false);
     setNewMessage("");
   };
 
+  const loadVersions = async () => {
+  try {
+    const { data } = await api.get(`/projects/versions/${projectId}`);
+    setVersions(data);
+  } catch (error) {
+    toast.error("Failed to load versions");
+  }
+};
+
+const saveVersion = async () => {
+  try {
+    await api.post('/projects/versions', {
+      projectId,
+      codeSnapshot: code
+    });
+    toast.success("Version saved successfully!");
+    loadVersions(); // Refresh list
+  } catch (error) {
+    toast.error("Failed to save version");
+  }
+};
+
+const restoreVersion = async (versionId) => {
+  if (!confirm("Restore this version? Current code will be replaced.")) return;
+  
+  try {
+    await api.post(`/projects/versions/${versionId}/restore`);
+    toast.success("Version restored!");
+    // Reload project
+    const { data } = await api.get(`/projects/${projectId}`);
+    setCode(data.currentCode);
+  } catch (error) {
+    toast.error("Failed to restore version");
+  }
+};
+
   return (
     <div className="h-screen flex flex-col bg-gray-950 text-white">
       {/* Top Bar */}
@@ -158,6 +195,16 @@ const [isExecuting, setIsExecuting] = useState(false);
           >
             💾 Save Project
           </button>
+
+          <button
+  onClick={() => {
+    setShowVersions(!showVersions);
+    if (!showVersions) loadVersions();
+  }}
+  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg"
+>
+  📜 Versions
+</button>
 
           <button
             onClick={() => navigate("/dashboard")}
@@ -198,6 +245,27 @@ const [isExecuting, setIsExecuting] = useState(false);
               ))}
             </div>
           </div>
+
+          {showVersions && (
+  <div className="absolute right-0 top-16 w-96 bg-gray-900 border-l border-gray-700 h-full p-4 overflow-auto">
+    <h3 className="font-bold mb-4">Version History</h3>
+    <button onClick={saveVersion} className="w-full mb-4 bg-purple-600 py-2 rounded-lg">
+      Save Current as New Version
+    </button>
+    
+    {versions.map((v) => (
+      <div key={v._id} className="bg-gray-800 p-3 rounded mb-3">
+        <p className="text-xs text-gray-400">{new Date(v.createdAt).toLocaleString()}</p>
+        <button
+          onClick={() => restoreVersion(v._id)}
+          className="text-blue-400 hover:underline text-sm mt-2"
+        >
+          Restore this version
+        </button>
+      </div>
+    ))}
+  </div>
+)}
 
           {/* Chat Messages */}
           <div
