@@ -109,6 +109,49 @@ const executeCode = async (req, res) => {
   }
 };
 
+// Join project using invite token
+const joinByInvite = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const project = await Project.findOne({ inviteToken: token });
+
+    if (!project) {
+      return res.status(404).json({ message: 'Invalid invite link' });
+    }
+
+    // Add user to collaborators if not already
+    if (!project.collaborators.includes(req.user.id)) {
+      project.collaborators.push(req.user.id);
+      await project.save();
+    }
+
+    res.json(project);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to join project' });
+  }
+};
+
+// Join using room code
+const joinByRoomCode = async (req, res) => {
+  try {
+    const { roomCode } = req.body;
+    const project = await Project.findOne({ roomCode });
+
+    if (!project) {
+      return res.status(404).json({ message: 'Invalid room code' });
+    }
+
+    if (!project.collaborators.includes(req.user.id)) {
+      project.collaborators.push(req.user.id);
+      await project.save();
+    }
+
+    res.json(project);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to join project' });
+  }
+};
+
 const saveVersion = async (req, res) => {
   try {
     const { projectId, codeSnapshot } = req.body;
@@ -158,4 +201,6 @@ module.exports = {
   saveVersion,
   getVersions,
   restoreVersion,
+  joinByInvite, 
+  joinByRoomCode
 };

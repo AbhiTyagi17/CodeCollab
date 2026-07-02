@@ -10,7 +10,9 @@ const {
   executeCode,
   saveVersion,
   getVersions,
-  restoreVersion
+  restoreVersion,
+  joinByInvite,
+  joinByRoomCode
 } = require('../controllers/projectController');
 
 router.post('/', protect, createProject);
@@ -22,5 +24,7 @@ router.post('/execute', protect, executeCode);
 router.post('/versions', protect, saveVersion);
 router.get('/versions/:projectId', protect, getVersions);
 router.post('/versions/:versionId/restore', protect, restoreVersion);
+router.get('/invite/:token', protect, joinByInvite);
+router.post('/join-room', protect, joinByRoomCode);
 
 module.exports = router;

@@ -29,6 +29,11 @@ const projectSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  roomCode: { 
+    type: String,
+    required: true,
+    unique: true 
+  },
   collaborators: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
