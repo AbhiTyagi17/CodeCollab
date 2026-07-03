@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-// ✅ No pre middleware - Hash in controller (cleanest for now)
+// No pre middleware - Hash in controller (cleanest for now)
 userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };

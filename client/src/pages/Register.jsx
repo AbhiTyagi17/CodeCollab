@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import api from '../lib/axios';
-import useAuthStore from '../store/authStore';
-import toast from 'react-hot-toast';
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import api from "../lib/axios";
+import useAuthStore from "../store/authStore";
+import toast from "react-hot-toast";
 
 const Register = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const setUser = useAuthStore((state) => state.setUser);
@@ -18,12 +18,16 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const { data } = await api.post('/auth/register', { name, email, password });
+      const { data } = await api.post("/auth/register", {
+        name,
+        email,
+        password,
+      });
       setUser(data);
-      toast.success('Account created successfully!');
-      navigate('/dashboard');
+      toast.success("Account created successfully!");
+      navigate("/dashboard");
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Registration failed');
+      toast.error(error.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -32,8 +36,10 @@ const Register = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-950">
       <div className="bg-gray-900 p-8 rounded-xl shadow-xl w-full max-w-md">
-        <h2 className="text-3xl font-bold text-center mb-8 text-white">Create Account</h2>
-        
+        <h2 className="text-3xl font-bold text-center mb-8 text-white">
+          Create Account
+        </h2>
+
         <form onSubmit={handleRegister} className="space-y-6">
           <div>
             <label className="block text-sm mb-2">Full Name</label>
@@ -73,13 +79,15 @@ const Register = () => {
             disabled={loading}
             className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition"
           >
-            {loading ? 'Creating Account...' : 'Register'}
+            {loading ? "Creating Account..." : "Register"}
           </button>
         </form>
 
         <p className="text-center mt-6 text-gray-400">
-          Already have an account?{' '}
-          <Link to="/login" className="text-blue-400 hover:underline">Login</Link>
+          Already have an account?{" "}
+          <Link to="/login" className="text-blue-400 hover:underline">
+            Login
+          </Link>
         </p>
       </div>
     </div>

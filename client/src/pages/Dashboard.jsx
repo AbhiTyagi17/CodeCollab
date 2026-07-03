@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react';
-import api from '../lib/axios';
-import useAuthStore from '../store/authStore';
-import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import api from "../lib/axios";
+import useAuthStore from "../store/authStore";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [roomCode, setRoomCode] = useState("");
 
   const navigate = useNavigate();
@@ -21,10 +21,10 @@ const Dashboard = () => {
 
   const fetchProjects = async () => {
     try {
-      const { data } = await api.get('/projects');
+      const { data } = await api.get("/projects");
       setProjects(data);
     } catch (error) {
-      toast.error('Failed to load projects');
+      toast.error("Failed to load projects");
     } finally {
       setLoading(false);
     }
@@ -32,16 +32,16 @@ const Dashboard = () => {
 
   const handleCreateProject = async (e) => {
     e.preventDefault();
-    if (!title) return toast.error('Title is required');
+    if (!title) return toast.error("Title is required");
 
     try {
-      const { data } = await api.post('/projects', { title, description });
+      const { data } = await api.post("/projects", { title, description });
       setProjects([data, ...projects]);
-      setTitle('');
-      setDescription('');
-      toast.success('Project created successfully!');
+      setTitle("");
+      setDescription("");
+      toast.success("Project created successfully!");
     } catch (error) {
-      toast.error('Failed to create project');
+      toast.error("Failed to create project");
     }
   };
 
@@ -49,7 +49,7 @@ const Dashboard = () => {
     if (!roomCode) return toast.error("Enter room code");
 
     try {
-      const { data } = await api.post('/projects/join-room', { roomCode });
+      const { data } = await api.post("/projects/join-room", { roomCode });
       toast.success("Joined project successfully!");
       fetchProjects();
       setRoomCode("");
@@ -64,7 +64,7 @@ const Dashboard = () => {
       <nav className="bg-gray-900 border-b border-gray-800 px-6 py-4">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold text-blue-400">CollabCode</h1>
-          
+
           <div className="flex items-center gap-4">
             <span>Welcome, {user?.name}</span>
             <button
@@ -128,7 +128,7 @@ const Dashboard = () => {
 
         {/* Projects List */}
         <h2 className="text-2xl font-semibold mb-6">Your Projects</h2>
-        
+
         {loading ? (
           <p>Loading projects...</p>
         ) : projects.length === 0 ? (
@@ -136,28 +136,33 @@ const Dashboard = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projects.map((project) => (
-              <div key={project._id} className="bg-gray-900 p-6 rounded-xl hover:border-blue-500 border border-transparent transition">
+              <div
+                key={project._id}
+                className="bg-gray-900 p-6 rounded-xl hover:border-blue-500 border border-transparent transition"
+              >
                 <h3 className="font-semibold text-lg mb-2">{project.title}</h3>
                 <p className="text-gray-400 text-sm mb-4 line-clamp-2">
-                  {project.description || 'No description'}
+                  {project.description || "No description"}
                 </p>
-                
+
                 <div className="flex justify-between items-center text-sm mt-4">
                   <div>
-                    <span className="text-gray-400">Room:</span> 
+                    <span className="text-gray-400">Room:</span>
                     <span className="font-mono ml-1">{project.roomCode}</span>
                   </div>
                   <div className="flex gap-2">
-                    <button 
+                    <button
                       onClick={() => {
-                        navigator.clipboard.writeText(`${window.location.origin}/editor/${project._id}`);
+                        navigator.clipboard.writeText(
+                          `${window.location.origin}/editor/${project._id}`,
+                        );
                         toast.success("Invite link copied!");
                       }}
                       className="text-xs px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded"
                     >
                       Copy Invite
                     </button>
-                    <button 
+                    <button
                       onClick={() => {
                         navigator.clipboard.writeText(project.roomCode);
                         toast.success("Room code copied!");
@@ -169,7 +174,7 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                <button 
+                <button
                   onClick={() => navigate(`/editor/${project._id}`)}
                   className="w-full mt-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg"
                 >

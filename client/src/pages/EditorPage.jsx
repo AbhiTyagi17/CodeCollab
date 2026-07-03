@@ -100,25 +100,27 @@ const EditorPage = () => {
   };
 
   const handleExecute = async () => {
-  if (!code.trim()) return toast.error("No code to execute");
+    if (!code.trim()) return toast.error("No code to execute");
 
-  setIsExecuting(true);
-  setOutput("Executing...");
+    setIsExecuting(true);
+    setOutput("Executing...");
 
-  try {
-    const { data } = await api.post('/projects/execute', {
-      code,
-      language,
-      input
-    });
+    try {
+      const { data } = await api.post("/projects/execute", {
+        code,
+        language,
+        input,
+      });
 
-    setOutput(data.output || data.error || "No output");
-  } catch (error) {
-    setOutput("Execution Error: " + (error.response?.data?.message || error.message));
-  } finally {
-    setIsExecuting(false);
-  }
-};
+      setOutput(data.output || data.error || "No output");
+    } catch (error) {
+      setOutput(
+        "Execution Error: " + (error.response?.data?.message || error.message),
+      );
+    } finally {
+      setIsExecuting(false);
+    }
+  };
 
   const sendMessage = () => {
     if (!newMessage.trim() || !socket) return;
@@ -131,40 +133,41 @@ const EditorPage = () => {
   };
 
   const loadVersions = async () => {
-  try {
-    const { data } = await api.get(`/projects/versions/${projectId}`);
-    setVersions(data);
-  } catch (error) {
-    toast.error("Failed to load versions");
-  }
-};
+    try {
+      const { data } = await api.get(`/projects/versions/${projectId}`);
+      setVersions(data);
+    } catch (error) {
+      toast.error("Failed to load versions");
+    }
+  };
 
-const saveVersion = async () => {
-  try {
-    await api.post('/projects/versions', {
-      projectId,
-      codeSnapshot: code
-    });
-    toast.success("Version saved successfully!");
-    loadVersions(); // Refresh list
-  } catch (error) {
-    toast.error("Failed to save version");
-  }
-};
+  const saveVersion = async () => {
+    try {
+      await api.post("/projects/versions", {
+        projectId,
+        codeSnapshot: code,
+      });
+      toast.success("Version saved successfully!");
+      loadVersions(); // Refresh list
+    } catch (error) {
+      toast.error("Failed to save version");
+    }
+  };
 
-const restoreVersion = async (versionId) => {
-  if (!confirm("Restore this version? Current code will be replaced.")) return;
-  
-  try {
-    await api.post(`/projects/versions/${versionId}/restore`);
-    toast.success("Version restored!");
-    // Reload project
-    const { data } = await api.get(`/projects/${projectId}`);
-    setCode(data.currentCode);
-  } catch (error) {
-    toast.error("Failed to restore version");
-  }
-};
+  const restoreVersion = async (versionId) => {
+    if (!confirm("Restore this version? Current code will be replaced."))
+      return;
+
+    try {
+      await api.post(`/projects/versions/${versionId}/restore`);
+      toast.success("Version restored!");
+      // Reload project
+      const { data } = await api.get(`/projects/${projectId}`);
+      setCode(data.currentCode);
+    } catch (error) {
+      toast.error("Failed to restore version");
+    }
+  };
 
   return (
     <div className="h-screen flex flex-col bg-gray-950 text-white">
@@ -197,14 +200,14 @@ const restoreVersion = async (versionId) => {
           </button>
 
           <button
-  onClick={() => {
-    setShowVersions(!showVersions);
-    if (!showVersions) loadVersions();
-  }}
-  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg"
->
-  📜 Versions
-</button>
+            onClick={() => {
+              setShowVersions(!showVersions);
+              if (!showVersions) loadVersions();
+            }}
+            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg"
+          >
+            📜 Versions
+          </button>
 
           <button
             onClick={() => navigate("/dashboard")}
@@ -247,25 +250,30 @@ const restoreVersion = async (versionId) => {
           </div>
 
           {showVersions && (
-  <div className="absolute right-0 top-16 w-96 bg-gray-900 border-l border-gray-700 h-full p-4 overflow-auto">
-    <h3 className="font-bold mb-4">Version History</h3>
-    <button onClick={saveVersion} className="w-full mb-4 bg-purple-600 py-2 rounded-lg">
-      Save Current as New Version
-    </button>
-    
-    {versions.map((v) => (
-      <div key={v._id} className="bg-gray-800 p-3 rounded mb-3">
-        <p className="text-xs text-gray-400">{new Date(v.createdAt).toLocaleString()}</p>
-        <button
-          onClick={() => restoreVersion(v._id)}
-          className="text-blue-400 hover:underline text-sm mt-2"
-        >
-          Restore this version
-        </button>
-      </div>
-    ))}
-  </div>
-)}
+            <div className="absolute right-0 top-16 w-96 bg-gray-900 border-l border-gray-700 h-full p-4 overflow-auto">
+              <h3 className="font-bold mb-4">Version History</h3>
+              <button
+                onClick={saveVersion}
+                className="w-full mb-4 bg-purple-600 py-2 rounded-lg"
+              >
+                Save Current as New Version
+              </button>
+
+              {versions.map((v) => (
+                <div key={v._id} className="bg-gray-800 p-3 rounded mb-3">
+                  <p className="text-xs text-gray-400">
+                    {new Date(v.createdAt).toLocaleString()}
+                  </p>
+                  <button
+                    onClick={() => restoreVersion(v._id)}
+                    className="text-blue-400 hover:underline text-sm mt-2"
+                  >
+                    Restore this version
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Chat Messages */}
           <div
@@ -306,36 +314,35 @@ const restoreVersion = async (versionId) => {
               </button>
             </div>
           </div>
-{/* Bottom Console */}
-<div className="h-72 bg-gray-900 border-t border-gray-700 flex flex-col">
-  <div className="flex justify-between items-center px-4 py-2 border-b border-gray-700 bg-gray-800">
-    <h3 className="font-semibold">Output Console</h3>
-    <button
-      onClick={handleExecute}
-      disabled={isExecuting}
-      className="px-6 py-1 bg-emerald-600 hover:bg-emerald-700 rounded-lg disabled:opacity-50"
-    >
-      {isExecuting ? "Running..." : "▶ Run Code"}
-    </button>
-  </div>
+          {/* Bottom Console */}
+          <div className="h-72 bg-gray-900 border-t border-gray-700 flex flex-col">
+            <div className="flex justify-between items-center px-4 py-2 border-b border-gray-700 bg-gray-800">
+              <h3 className="font-semibold">Output Console</h3>
+              <button
+                onClick={handleExecute}
+                disabled={isExecuting}
+                className="px-6 py-1 bg-emerald-600 hover:bg-emerald-700 rounded-lg disabled:opacity-50"
+              >
+                {isExecuting ? "Running..." : "▶ Run Code"}
+              </button>
+            </div>
 
-  {/* Input Area */}
-  <div className="p-3 border-b border-gray-700 bg-gray-950">
-    <p className="text-xs text-gray-400 mb-1">Input (stdin)</p>
-    <textarea
-      value={input}
-      onChange={(e) => setInput(e.target.value)}
-      className="w-full h-16 bg-gray-800 p-3 rounded text-sm font-mono resize-y"
-      placeholder="Enter input here..."
-    />
-  </div>
+            {/* Input Area */}
+            <div className="p-3 border-b border-gray-700 bg-gray-950">
+              <p className="text-xs text-gray-400 mb-1">Input (stdin)</p>
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                className="w-full h-16 bg-gray-800 p-3 rounded text-sm font-mono resize-y"
+                placeholder="Enter input here..."
+              />
+            </div>
 
-  {/* Output Area */}
-  <div className="flex-1 p-4 overflow-auto font-mono text-sm whitespace-pre-wrap bg-gray-950">
-    {output || "Run your code to see output here..."}
-  </div>
-</div>
-
+            {/* Output Area */}
+            <div className="flex-1 p-4 overflow-auto font-mono text-sm whitespace-pre-wrap bg-gray-950">
+              {output || "Run your code to see output here..."}
+            </div>
+          </div>
         </div>
       </div>
     </div>

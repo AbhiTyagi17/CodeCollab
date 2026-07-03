@@ -11,7 +11,6 @@ const generateInviteToken = () => {
   return Math.random().toString(36).substring(2, 15);
 };
 
-// Main Controller Functions
 const createProject = async (req, res) => {
   try {
     const { title, description, language } = req.body;
@@ -59,7 +58,7 @@ const getProject = async (req, res) => {
 
     const isOwner = project.createdBy._id.toString() === req.user.id;
     const isCollaborator = project.collaborators.some(
-      (c) => c._id.toString() === req.user.id
+      (c) => c._id.toString() === req.user.id,
     );
 
     if (!isOwner && !isCollaborator) {
@@ -93,33 +92,33 @@ const executeCode = async (req, res) => {
     const { code, language, input = "" } = req.body;
 
     let output = `Executed ${language} code successfully (Mock for prototype)`;
-    if (language === "javascript") output = "Hello from CollabCode!\nJS executed.";
-    if (language === "python") output = "Hello from CollabCode!\nPython executed.";
+    if (language === "javascript")
+      output = "Hello from CollabCode!\nJS executed.";
+    if (language === "python")
+      output = "Hello from CollabCode!\nPython executed.";
 
-    await new Promise(resolve => setTimeout(resolve, 600));
+    await new Promise((resolve) => setTimeout(resolve, 600));
 
     res.json({
       output,
       error: "",
       status: "Success",
-      note: "Mock execution - Judge0 can be integrated later"
+      note: "Mock execution - Judge0 can be integrated later",
     });
   } catch (error) {
     res.status(500).json({ message: "Execution failed" });
   }
 };
 
-// Join project using invite token
 const joinByInvite = async (req, res) => {
   try {
     const { token } = req.params;
     const project = await Project.findOne({ inviteToken: token });
 
     if (!project) {
-      return res.status(404).json({ message: 'Invalid invite link' });
+      return res.status(404).json({ message: "Invalid invite link" });
     }
 
-    // Add user to collaborators if not already
     if (!project.collaborators.includes(req.user.id)) {
       project.collaborators.push(req.user.id);
       await project.save();
@@ -127,7 +126,7 @@ const joinByInvite = async (req, res) => {
 
     res.json(project);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to join project' });
+    res.status(500).json({ message: "Failed to join project" });
   }
 };
 
@@ -138,7 +137,7 @@ const joinByRoomCode = async (req, res) => {
     const project = await Project.findOne({ roomCode });
 
     if (!project) {
-      return res.status(404).json({ message: 'Invalid room code' });
+      return res.status(404).json({ message: "Invalid room code" });
     }
 
     if (!project.collaborators.includes(req.user.id)) {
@@ -148,7 +147,7 @@ const joinByRoomCode = async (req, res) => {
 
     res.json(project);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to join project' });
+    res.status(500).json({ message: "Failed to join project" });
   }
 };
 
@@ -168,8 +167,9 @@ const saveVersion = async (req, res) => {
 
 const getVersions = async (req, res) => {
   try {
-    const versions = await Version.find({ projectId: req.params.projectId })
-      .sort({ createdAt: -1 });
+    const versions = await Version.find({
+      projectId: req.params.projectId,
+    }).sort({ createdAt: -1 });
     res.json(versions);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch versions" });
@@ -191,7 +191,6 @@ const restoreVersion = async (req, res) => {
   }
 };
 
-// Final Export
 module.exports = {
   createProject,
   getProjects,
@@ -201,6 +200,6 @@ module.exports = {
   saveVersion,
   getVersions,
   restoreVersion,
-  joinByInvite, 
-  joinByRoomCode
+  joinByInvite,
+  joinByRoomCode,
 };

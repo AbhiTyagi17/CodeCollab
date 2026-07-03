@@ -1,58 +1,54 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const projectSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
   description: {
     type: String,
-    default: ''
+    default: "",
   },
   language: {
     type: String,
-    enum: ['javascript', 'python', 'java', 'cpp'],
-    default: 'javascript'
+    enum: ["javascript", "python", "java", "cpp"],
+    default: "javascript",
   },
   currentCode: {
     type: String,
-    default: '// Start coding here...'
+    default: "// Start coding here,This is Abhi's Editor....",
   },
   roomCode: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
   inviteToken: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
-  roomCode: { 
-    type: String,
-    required: true,
-    unique: true 
-  },
-  collaborators: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }],
+  collaborators: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+    ref: "User",
+    required: true,
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   updatedAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
-// Update timestamp manually in controller (safer)
-const Project = mongoose.model('Project', projectSchema);
+const Project = mongoose.model("Project", projectSchema);
 module.exports = Project;

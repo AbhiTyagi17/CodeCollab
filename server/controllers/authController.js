@@ -70,10 +70,10 @@ const loginUser = async (req, res) => {
       token: generateToken(user)
     });
 } catch (error) {
-  console.error('Auth Error:', error);   // ← Add this line
+  console.error('Auth Error:', error);   
   res.status(500).json({ 
     message: 'Server error', 
-    error: error.message   // ← Add this (remove in production)
+    error: error.message   
   });
 }
 };

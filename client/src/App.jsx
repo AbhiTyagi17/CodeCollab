@@ -1,10 +1,15 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import EditorPage from './pages/EditorPage';
-import useAuthStore from './store/authStore';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import EditorPage from "./pages/EditorPage";
+import useAuthStore from "./store/authStore";
 
 function ProtectedRoute({ children }) {
   const user = useAuthStore((state) => state.user);
@@ -22,23 +27,23 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        
-        <Route 
-          path="/dashboard" 
+
+        <Route
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
-          } 
+          }
         />
 
-        <Route 
-          path="/editor/:projectId" 
+        <Route
+          path="/editor/:projectId"
           element={
             <ProtectedRoute>
               <EditorPage />
             </ProtectedRoute>
-          } 
+          }
         />
 
         <Route path="/" element={<Navigate to="/login" replace />} />

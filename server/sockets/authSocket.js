@@ -1,11 +1,11 @@
-const jwt = require('jsonwebtoken');
-const Project = require('../models/Project');
+const jwt = require("jsonwebtoken");
+const Project = require("../models/Project");
 
 const authenticateSocket = async (socket, next) => {
   const token = socket.handshake.auth.token;
 
   if (!token) {
-    return next(new Error('Authentication error'));
+    return next(new Error("Authentication error"));
   }
 
   try {
@@ -13,7 +13,7 @@ const authenticateSocket = async (socket, next) => {
     socket.user = decoded;
     next();
   } catch (err) {
-    next(new Error('Invalid token'));
+    next(new Error("Invalid token"));
   }
 };
 
