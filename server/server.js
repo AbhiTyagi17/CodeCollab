@@ -74,6 +74,17 @@ connectDB()
           socket.join(projectId);
           console.log(`User ${socket.user.email} joined room: ${projectId}`);
 
+
+            const usersInRoom = Array.from(io.sockets.adapter.rooms.get(projectId) || [])
+              .map((socketId) => {
+                const s = io.sockets.sockets.get(socketId);
+                return s ? { id: s.user.id, email: s.user.email } : null;
+              })
+              .filter(Boolean);
+          
+            socket.emit("current-users", { users: usersInRoom });
+
+            
           // Notify others in room
           socket.to(projectId).emit("user-joined", {
             user: { id: socket.user.id, email: socket.user.email },

@@ -37,8 +37,15 @@ const EditorPage = () => {
     });
 
     socket.on("user-joined", ({ user }) => {
-      setConnectedUsers((prev) => [...prev, user]);
-      toast.success(`${user.email} joined`);
+      setConnectedUsers((prev) => {
+        if (prev.some((u) => u.id === user.id)) return prev;
+        return [...prev, user];
+      });
+      toast.success(`${user.email} joined the room`);
+    });
+
+    socket.on("current-users", ({ users }) => {
+      setConnectedUsers(users);
     });
 
     socket.on("receive-message", (message) => {

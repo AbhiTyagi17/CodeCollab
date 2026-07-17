@@ -66,7 +66,10 @@ const Dashboard = () => {
           <h1 className="text-2xl font-bold text-blue-400">CollabCode</h1>
 
           <div className="flex items-center gap-4">
-            <span>Welcome, {user?.name}</span>
+            <span>
+              Welcome,{" "}
+              <span className="font-semibold">{user?.name || "User"}</span>
+            </span>
             <button
               onClick={logout}
               className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm"
